@@ -1,0 +1,36 @@
+{
+  "Phase 1: Deep Codebase Reconnaissance & Attack Surface Mapping": {
+    "Target Endpoints (The 'Heavy' Paths)": [
+      {
+        "endpoint": "GET /api/v1/delivery/available",
+        "bottleneck": "Massive ORM overhead. Performs three joinedloads (Delivery.order -> Order.restaurant, Order.customer, Order.items) without pagination or index limits."
+      },
+      {
+        "endpoint": "POST /api/v1/orders",
+        "bottleneck": "Heavy write transaction. Creates an Order, multiple OrderItems, and auto-generates a Delivery record within a single transactional scope. Calculates subtotals repeatedly."
+      },
+      {
+        "endpoint": "GET /api/v1/restaurants/restaurant-orders",
+        "bottleneck": "Multi-tenant leakage risk. Queries all restaurants owned by a user, extracts their IDs into a Python list, and filters `Order.restaurant_id.in_(target_ids)`. Subject to severe degradation if an owner has many restaurants/orders."
+      },
+      {
+        "endpoint": "POST /api/v1/payments/process",
+        "bottleneck": "Simulated external latency (`await asyncio.sleep(random.uniform(0.5, 2.0))`). Under high concurrency, this will rapidly exhaust the Uvicorn worker limits or PostgreSQL connection pool while waiting for the sleep to complete."
+      },
+      {
+        "endpoint": "GET /api/v1/restaurants?limit=100",
+        "bottleneck": "Complex dynamic filtering (`ilike` wildcard searches on name, description, city). Table scans highly probable depending on Postgres index configurations."
+      }
+    ],
+    "Authentication & State": {
+      "flow": "JWT (JSON Web Token)",
+      "mechanism": "Clients POST credentials to `/api/v1/auth/login`. Server hashes password via `passlib` (bcrypt), returns `access_token` and `refresh_token`.",
+      "vu_bypass_strategy": "VUs must simulate the login sequence once per session to acquire the Bearer token, or pre-seed a static list of valid tokens in Redis/CSV for the VUs to round-robin, bypassing the expensive bcrypt hashing step during the actual load test."
+    },
+    "Infrastructure Bottlenecks": {
+      "db_connection_pool": "SQLAlchemy engine initialized with `pool_size=10, max_overflow=20` (in `backend/app/db/base.py`). This strictly caps concurrent database connections at 30. Any requests beyond 30 concurrent DB hits will queue and eventually timeout.",
+      "caching": "Redis is used for ObservationLogs and Injection coordination, but there is ZERO caching applied to domain entities (Restaurants, Menus, Orders). Every GET request hits Postgres.",
+      "sync_io_in_async": "SQLAlchemy ORM queries are executed synchronously. Despite FastAPI being async, these DB calls will block the thread pool, leading to event loop starvation."
+    }
+  }
+}
