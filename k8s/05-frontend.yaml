@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crave-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: crave-frontend
+  template:
+    metadata:
+      labels:
+        app: crave-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: crave-frontend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: crave-frontend
+spec:
+  selector:
+    app: crave-frontend
+  ports:
+    - port: 80
+      targetPort: 80

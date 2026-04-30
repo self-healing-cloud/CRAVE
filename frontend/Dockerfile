@@ -1,18 +1,28 @@
-FROM node:20-alpine
+# Build Stage
+FROM node:20-alpine AS build
 
 WORKDIR /app
 
 # Copy package files first for better layer caching
 COPY package.json package-lock.json* ./
 
-# Install ALL dependencies (including devDeps needed for Vite)
-RUN npm install
+# Install ALL dependencies
+RUN npm ci
 
 # Copy the rest of the source
 COPY . .
 
-# Expose Vite dev port
-EXPOSE 3000
+# Build the application
+RUN npm run build
 
-# Start Vite dev server bound to all interfaces so Docker can reach it
-CMD ["npm", "run", "dev"]
+# Serve Stage
+FROM nginx:alpine
+
+# Copy built assets to Nginx
+COPY --from=build /app/dist /usr/share/nginx/html
+
+# Expose port
+EXPOSE 80
+
+# Start Nginx
+CMD ["nginx", "-g", "daemon off;"]

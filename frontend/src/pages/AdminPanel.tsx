@@ -156,7 +156,7 @@ function RegistryRow({ entry, onDeactivate, onActivate }: {
 }
 
 // ── Simulator Panel ────────────────────────────────────────────────────────
-function SimulatorPanel() {
+export function SimulatorPanel() {
     const [simEnabled, setSimEnabled] = useState(false);
     const [loading, setLoading] = useState(false);
     const [metrics, setMetrics] = useState<{ total_requests: number; failed_requests: number; success_rate: number; active_scenarios: number } | null>(null);

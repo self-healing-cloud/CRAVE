@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: crave-config
+data:
+  DEBUG: "false"
+  POSTGRES_SERVER: "crave-postgres"
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: "food_delivery"
+  REDIS_HOST: "crave-redis"
+  REDIS_PORT: "6379"
+  ACCESS_TOKEN_EXPIRE_MINUTES: "60"
+  REFRESH_TOKEN_EXPIRE_DAYS: "7"
+  ALGORITHM: "HS256"
+  CORS_ORIGINS: '["*"]'
+  FAILURE_SIMULATOR_ENABLED: "true"
+  RABBITMQ_HOST: ""
+  COMPONENT_A_HEAL_ENDPOINT: ""
+  CRAVE_BACKEND_URL: "http://crave-backend:8000"
+  INJECT_INTERVAL_SECONDS: "120"
+  SCENARIO_DURATION_SECONDS: "60"
+  TRAFFIC_INTERVAL_SECONDS: "2"
+  # VITE_API_URL is handled dynamically via relative paths (/api/v1) on the frontend
+---
+# IMPORTANT: In a real production environment, DO NOT commit this secret file.
+# Replace with a secure secret management solution like Sealed Secrets,
+# External Secrets Operator (AWS Secrets Manager/HashiCorp Vault), or
+# create the secret manually in the cluster.
+# Providing a placeholder template here.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: crave-secrets
+type: Opaque
+stringData:
+  POSTGRES_USER: "REPLACE_WITH_SECURE_POSTGRES_USER"
+  POSTGRES_PASSWORD: "REPLACE_WITH_SECURE_POSTGRES_PASSWORD"
+  SECRET_KEY: "REPLACE_WITH_SECURE_SECRET_KEY"
+  CRAVE_DEVELOPER_EMAIL: "REPLACE_WITH_SECURE_DEVELOPER_EMAIL"
+  CRAVE_DEVELOPER_PASSWORD: "REPLACE_WITH_SECURE_DEVELOPER_PASSWORD"
+  CRAVE_CUSTOMER_EMAIL: "REPLACE_WITH_SECURE_CUSTOMER_EMAIL"
+  CRAVE_CUSTOMER_PASSWORD: "REPLACE_WITH_SECURE_CUSTOMER_PASSWORD"

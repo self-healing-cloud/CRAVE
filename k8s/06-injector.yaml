@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crave-injector
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: crave-injector
+  template:
+    metadata:
+      labels:
+        app: crave-injector
+    spec:
+      containers:
+        - name: injector
+          image: crave-injector:latest
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: crave-config
+            - secretRef:
+                name: crave-secrets

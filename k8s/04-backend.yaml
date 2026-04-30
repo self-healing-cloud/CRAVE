@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crave-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: crave-backend
+  template:
+    metadata:
+      labels:
+        app: crave-backend
+    spec:
+      initContainers:
+        - name: init-db
+          image: crave-backend:latest # Assuming this image is built and available
+          imagePullPolicy: IfNotPresent
+          command: ["python", "init_db.py"]
+          envFrom:
+            - configMapRef:
+                name: crave-config
+            - secretRef:
+                name: crave-secrets
+      containers:
+        - name: backend
+          image: crave-backend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: crave-config
+            - secretRef:
+                name: crave-secrets
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: crave-backend
+spec:
+  selector:
+    app: crave-backend
+  ports:
+    - port: 8000
+      targetPort: 8000
