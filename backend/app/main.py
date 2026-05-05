@@ -46,7 +46,9 @@ async def lifespan(app: FastAPI):
         #    This prevents the heal-triggered restart from turning off
         #    publishing that the user explicitly enabled.
         if _r.get("crave:rabbitmq:enabled") is None:
-            _r.set("crave:rabbitmq:enabled", "0")
+            import os
+            initial_val = "1" if os.getenv("NIRAMAY_PUBLISH_ENABLED", "").lower() == "true" else "0"
+            _r.set("crave:rabbitmq:enabled", initial_val)
         # 2. Flush stale observation logs from Redis
         _r.delete("observation:logs")
         logger.info("Startup reset: RabbitMQ publishing state preserved, observation logs flushed from Redis")
