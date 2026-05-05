@@ -62,7 +62,7 @@ services:
       FAILURE_SIMULATOR_ENABLED: "true"
       RABBITMQ_HOST: "niramay-rabbitmq"
       RABBITMQ_PORT: "5672"
-      NIRAMAY_PUBLISH_ENABLED: "false"
+      NIRAMAY_PUBLISH_ENABLED: "true"
       COMPONENT_A_HEAL_ENDPOINT: ""
       NIRAMAY_URL: ""
       K3S_ENABLED: "false"
